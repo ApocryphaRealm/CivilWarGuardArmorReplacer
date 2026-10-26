@@ -5,7 +5,9 @@ One install covering both sides of the Civil War and the hold guards:
 * **Sons of Skyrim** ([68656](https://www.nexusmods.com/skyrimspecialedition/mods/68656)) - the
   Stormcloak and hold-guard armour, by NordwarUA.
 * **New Legion** ([30468](https://www.nexusmods.com/skyrimspecialedition/mods/30468)) - the Imperial
-  Legion replacer, by NordwarUA, including the general's dragon-motif set.
+  Legion replacer, by NordwarUA. Its two dragon-motif sets - the officer armour and the emperor's - were
+  removed on 2026-09-18: General Tullius wears the Imperial Tribune set instead, the Civil War officers wear
+  the Legate cuirass with the Legate helmet, and Titus Mede II wears New Legion's ordinary Imperial armour.
 * **Guards Armor Replacer** ([22671](https://www.nexusmods.com/skyrimspecialedition/mods/22671)) -
   its Winterhold set and its Windhelm Scale set, light and heavy, standing in for Sons of Skyrim's
   own versions of those two holds.
