@@ -46,6 +46,9 @@
     import silently dropped 74), and esp-audit passes for runtime 1.5.97.
 - `merge-to-espfe.py` now writes the full group tree itself, so a re-merge cannot reintroduce this.
 
+### Fixed
+- Four item names were misspelled: 'Windhelm Ligth Helmet' and two 'Stormcloak Ligth Shield' now read 'Light', and 'General Tullius' Cermonial Sword' reads 'Ceremonial' (found by the 2.0.0 in-game test; every FULL name in the plugin was scanned). spid-convert.py fixes them in the kept records (NAME_FIXES); a record diff against the previous build shows only those four FULL strings changed - same 956 records, FormIDs, order, flags and masters - and the _DISTR.ini and verify-spid.py output are identical. EditorIDs keep their old spelling.
+
 ## 1.0.0 - 2026-09-17
 
 - Sons of Skyrim, New Legion, Guards Armor Replacer's Winterhold and Windhelm Scale sets and the Imperial Tribune

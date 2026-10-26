@@ -43,6 +43,7 @@ Usage (the 1.0.x source plugin is in git: git show b3a019e:"plugin/Civil War Gua
 import argparse
 import json
 import os
+import re
 import struct
 import sys
 import zlib
@@ -55,6 +56,11 @@ KEEP_NEW = {"ARMO", "ARMA", "OTFT", "LVLI", "WEAP", "AMMO", "PROJ", "COBJ", "STA
 KEEP_OVERRIDE = {"ARMO", "ARMA", "WEAP", "COBJ"}
 LIGHT_FLAG = 0x200
 COMPRESSED = 0x40000
+
+# Item names the player sees (FULL) that 1.0.x carried misspelled - whole words, fixed in the kept records only.
+# Found 2026-10-26: the 2.0.0 in-game test read "Windhelm Ligth Helmet" off a guard; a scan of every FULL found the
+# rest. EditorIDs keep their old spelling (nothing a player sees, and other files may name them).
+NAME_FIXES = {"Ligth": "Light", "Cermonial": "Ceremonial"}
 
 
 TOP_ORDER = ("GMST KYWD LCRT AACT TXST GLOB CLAS FACT HDPT HAIR EYES RACE SOUN ASPC MGEF SCPT LTEX ENCH SPEL SCRL "
@@ -277,7 +283,7 @@ def main():
         return out
 
     # kept new OTFT / LVLI get their references rewritten; everything else kept is copied byte for byte
-    kept, dropped = [], {}
+    kept, dropped, renamed = [], {}, []
     for r in recs:
         keep = (is_new(r) and r.sig in KEEP_NEW) or (not is_new(r) and r.sig in KEEP_OVERRIDE)
         if not keep:
@@ -286,6 +292,18 @@ def main():
         kept.append(r)
         if is_new(r) and r.sig in ("OTFT", "LVLI"):
             out_records[r.fid] = (r.sig, r.flags, r.fid, r.tail, build_body(list_refs_rewritten(r.sig, r.subs())))
+        full = r.get("FULL")
+        if full is not None:
+            name = full.rstrip(b"\0").decode("latin-1")
+            fixed = re.sub(r"\b(" + "|".join(NAME_FIXES) + r")\b", lambda m: NAME_FIXES[m.group(1)], name)
+            if fixed != name:
+                base = r.subs()
+                if r.fid in out_records:    # an OTFT/LVLI already rewritten above: rename that version
+                    sig_, flags_, fid_, tail_, body_ = out_records[r.fid]
+                    base = Rec(sig_, flags_, fid_, tail_, b"", body_).subs()
+                subs = [("FULL", fixed.encode("latin-1") + b"\0") if s_ == "FULL" else (s_, d) for s_, d in base]
+                out_records[r.fid] = (r.sig, r.flags, r.fid, r.tail, build_body(subs))
+                renamed.append({"formid": f"{r.fid:08X}", "edid": r.edid, "from": name, "to": fixed})
 
     # every vanilla outfit 1.0.x overrode gets a copy (rule A distributes it)
     for fid, r in ovr_lists.items():
@@ -556,7 +574,7 @@ def main():
         f.write("\n".join(lines) + "\n")
 
     report = {"kept": len(kept), "copies": len(copies), "records": nrec, "next_id": hex(next_id),
-              "dropped": dropped, "rule_a": rule_a, "rule_b": rule_b,
+              "dropped": dropped, "renamed": renamed, "rule_a": rule_a, "rule_b": rule_b,
               "b_skipped_template_npcs": [(npc_name(c), edid_of(o)) for c, o in skipped_b],
               "rule_a2": {edid_of(x): edid_of(o) for x, o in rule_a2.items()},
               "vanilla_outfit_copies_for_b": [edid_of(f) for f in vanilla_copies]}
@@ -564,6 +582,8 @@ def main():
         json.dump(report, open(a.report, "w"), indent=1)
     print(f"plugin: {nrec} records ({len(kept)} kept, {len(copies)} CWGAR_ copies), next light id {next_id:#x}")
     print(f"dropped: {dropped}")
+    for n in renamed:
+        print(f"renamed {n['formid']} {n['edid']}: {n['from']!r} -> {n['to']!r}")
     print(f"ini: {len(rule_a)} rule-A lines, {len(rule_b)} rule-B lines ({sum(len(v) for v in npc_rules.values())} NPCs)")
 
 
