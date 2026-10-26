@@ -1,8 +1,32 @@
 # Civil War Guard Armor Replacer - changelog
 
-## 1.0.1 - 2026-10-25 - untested
+## 2.0.0 - 2026-10-26 - untested
 
-### Fixed
+### Changed
+- **Who wears what is now decided by Spell Perk Item Distributor, not by the plugin.** The plugin only defines the
+  armour; `Civil War Guard Armor Replacer_DISTR.ini` hands it out. Section B names the NPCs 1.0.x gave a particular
+  variant (259 NPCs, each paired with the outfit it starts in); section A gives whoever the plugins dress in a vanilla
+  guard / soldier outfit this mod's version of it (58 lines). The vanilla outfit is the filter, so the rules reach
+  exactly the NPCs 1.0.x reached - a Vigilant of Stendarr, bandit or citizen cannot match. Works on existing saves.
+- The plugin keeps its name and every FormID, stays light, and holds item records only: the new armour, weapons and
+  their first-person models, the outfits and levelled lists, crafting recipes, and the vanilla Imperial / Penitus /
+  Stormcloak pieces whose art it replaces. 71 new `CWGAR_` outfits and levelled lists carry what 1.0.x wrote into
+  vanilla outfits and lists, so the vanilla records are no longer edited. 956 records (was 1312).
+- Built by `tools/spid-convert.py` from the 1.0.1 plugin; `tools/verify-spid.py` proves it against a load order
+  (Njordlinger Test: 0 unresolved forms, 815 NPCs dressed, nobody gained or lost this mod's armour, 40 NPCs in another
+  variant of the same set, 78 Vigilants of Stendarr unchanged). Design: `docs/spid-design.md`.
+
+### Added
+- Requirement: Spell Perk Item Distributor 7.2 or later.
+
+### Removed
+- The 264 NPC record edits (with Sons of Skyrim's inventory, stat, class and name changes - guards carry vanilla
+  weapons again), the 45 vanilla outfit and 28 levelled list edits, the levelled guard lists, blacksmith stock, the
+  Civil War and Dark Brotherhood quest edits, the armour displays in Dragonsreach, the Jarl's Longhouse, the Palace of
+  the Kings and Helgen Keep (the vanilla clutter they deleted returns), and five guard dialogue lines. SPID cannot
+  carry placed objects or dialogue, and none of them is a guard's armour.
+
+### Fixed (carried from the withdrawn, never-posted 1.0.1 - the regrouped plugin is the input spid-convert reads; 2.0.0 then removes its placed references and dialogue)
 - **The plugin's records sit in the groups the game and Mutagen read them from.** The merged plugin carried
   top-level REFR and INFO groups and held its four cell edits loose in the CELL group, because the merge tool
   kept each source's records but dropped the group tree that says which cell a placed object is in and which
